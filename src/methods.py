@@ -13,49 +13,51 @@ def drawText(screen, text, pos):
 
 def showVars(screen, player, tf, ballXY, Enemys):
     # Funcion que muestra variables en pantalla
-    startPos = HEIGHT - FLOOR
+    start_pos = HEIGHT - FLOOR
     col0 = [
-        "|F|:" + str(round(player.fuerza, 2)) + " N/m",
-        "Angulo:" + str(round(player.angulo, 2)) + "°",
-        "Tiempo Inicial: 0" + " s",
-        "Tiempo Actual: " + str(round((tf / 1000.0), 2)) + " s",
-        "*Tiempo Final:"
-        + str(round(((player.fuerza * math.sin(math.radians(player.angulo))) * 2) / GRAVITY, 2))
-        + " s",
+        "|F|: %s N/m" % str(round(player.fuerza, 2)),
+        "Angulo: %s°" % str(round(player.angulo, 2)),
+        "Tiempo Inicial: 0 s",
+        "Tiempo Actual: %s s" % str(round((tf / 1000.0), 2)),
+        "*Tiempo Final: %s s"
+        % str(round(((player.fuerza * math.sin(math.radians(player.angulo))) * 2) / GRAVITY, 2)),
     ]
     col1 = [
         "Eje X (MRU):",
-        "Velocidad Inicial: " + str(round(player.vx, 2)) + " m/s",
-        "Velocidad Actual: " + str(round(player.vx, 2)) + " m/s",
-        "Posicion Inicial: " + str(round(player.x, 2)) + " m",
-        "Posicion Actual: " + str(round(ballXY[len(ballXY) - 1][0], 2)) + " m",
-        "*Posicion Final: "
-        + str(
+        "Velocidad Inicial: %s m/s" % str(round(player.vx, 2)),
+        "Velocidad Actual: %s m/s" % str(round(player.vx, 2)),
+        "Posicion Inicial: %s m" % str(round(player.x, 2)),
+        "Posicion Actual: %s m" % str(round(ballXY[len(ballXY) - 1][0], 2)),
+        "*Posicion Final: %s m"
+        % str(
             round(
                 player.x
                 + (((player.fuerza * math.sin(math.radians(player.angulo))) * 2) / GRAVITY)
                 * player.vx,
                 2,
             )
-        )
-        + " m",
+        ),
         "Eje Y (MRUV):",
-        "Velocidad Inicial: " + str(round(player.vy, 2)) + " m/s",
-        "Velocidad Actual: " + str(round(player.vy - GRAVITY * (tf / 1000.0), 2)) + " m/s",
-        "Posicion Inicial: " + str(round(HEIGHT - FLOOR - player.y - player.height, 2)) + " m",
-        "Posicion Actual: " + str(round(ballXY[len(ballXY) - 1][1], 2)) + " m",
+        "Velocidad Inicial: %s m/s" % str(round(player.vy, 2)),
+        "Velocidad Actual: %s m/s" % str(round(player.vy - GRAVITY * (tf / 1000.0), 2)),
+        "Posicion Inicial: %s m" % str(round(HEIGHT - FLOOR - player.y - player.height, 2)),
+        "Posicion Actual: %s m" % str(round(ballXY[len(ballXY) - 1][1], 2)),
         "*Posicion Final: 0 m",
     ]
     col3 = [
-        "Cajas Destruidas: " + str(player.score),
-        "Cajas Destruidas Totales: " + str(Enemys.destroyed),
+        "Cajas Destruidas: %s" % str(player.score),
+        "Cajas Destruidas Totales: %s" % str(Enemys.destroyed),
     ]
-    for c in range(len(col0)):
-        drawText(screen, col0[c], (20, 10 + startPos + 15 * c))
-    for c in range(len(col1)):
-        drawText(screen, col1[c], (220 + 320 * (int(c / 6)), startPos + 15 * ((c) % 6)))
-    for c in range(len(col3)):
-        drawText(screen, col3[c], (10, 180 + 20 * c))
+    for enum_col in enumerate(col0):
+        drawText(screen, enum_col[1], (20, 10 + start_pos + 15 * enum_col[0]))
+    for enum_col in enumerate(col1):
+        drawText(
+            screen,
+            enum_col[1],
+            (220 + 320 * (int(enum_col[0] / 6)), start_pos + 15 * ((enum_col[0]) % 6)),
+        )
+    for enum_col in enumerate(col3):
+        drawText(screen, enum_col[1], (10, 180 + 20 * enum_col[0]))
 
 
 def textGraphXY(self, screen):
@@ -112,10 +114,10 @@ def drawHandler(screen, time, player, Graphs, Enemys, BackGround):
     # Funcion que se encarga de realizar todos los dibujos y pasarle los datos a las graficas
     BackGround.draw(screen)  # Dibuja fondo
     player.draw(screen)  # Dibuja jugador
-    for e in Enemys.listE:  # Dibuja todas las cajas
-        e.draw(screen)
+    for enemy in Enemys.listE:  # Dibuja todas las cajas
+        enemy.draw(screen)
 
-    dataGraphs = [
+    data_graphs = [
         [
             player.rect.x,
             500 - player.rect.bottom,
@@ -124,7 +126,8 @@ def drawHandler(screen, time, player, Graphs, Enemys, BackGround):
         [time, 500 - player.rect.bottom],
         [time, player.rect.x * -1],
     ]
-    for i in range(len(Graphs)):  # Por cada grafica, se dibuja y se le asignan los nuevos datos
-        Graphs[i].draw(screen, dataGraphs[i])
+    for enum_graph in enumerate(Graphs):
+        # Por cada grafica, se dibuja y se le asignan los nuevos datos
+        enum_graph[1].draw(screen, data_graphs[enum_graph[0]])
     showVars(screen, player, time, Graphs[0].past, Enemys)  # Se dibuja cada variable en pantalla
     pygame.display.update()  # Se actualiza la pantalla

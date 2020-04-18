@@ -9,95 +9,97 @@ from src.classes import BackGround, Enemy, Graph, Player
 from src.config import WIDTH, HEIGHT, FLOOR, CREDITS, GRAVITY
 
 
+def check_close():
+    # Se esperan eventos de cierre
+    # El siguiente codigo recorre los eventos del juego esperando
+    # si se pidio un evento de cierre,
+    # Si este sucede se cierra el programa
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            exit()
+    pygame.event.pump()  # se esperan mas eventos
+
+
 def start(screen, clock):
     player = None  # A esta variable se le asiganara el objeto de jugador
-    notTrue = True  # Control del while de tiro y resultado. Cuando es True es cuando el usuario esta asignando el angulo y fuerza. Cuando es False es cuando el jugador se esta moviendo
-    lastPoint = [
+    # Control del while de tiro y resultado. Cuando es True es cuando el usuario esta asignando
+    # el angulo y fuerza. Cuando es False es cuando el jugador se esta moviendo
+    aiming = True
+    # Variable que guarda el ultimo punto en donde estaba el cursor, con limitaciones
+    last_point = [
         21,
         HEIGHT - 21,
-    ]  # Variable que guarda el ultimo punto en donde estaba el cursor, con limitaciones
-    col = []  # Variable que guardara textos a imprimir en pantalla
+    ]
     BackGround(0, 0, "./assets/bgi.png")  # Se crea un objeto fondo
-    timeCalculated = 0  # Variable que guardara cuando demorara el tiro en caer al piso
+    time_calculated = 0  # Variable que guardara cuando demorara el tiro en caer al piso
     xfinal = 0  # Variable que guardara cual sera la posicion final en X
     ymedia = 0  # Variable que guardara cual sera la altura maxima en Y
 
-    while notTrue == True:  # Mientras el usuario esta decidiendo Fuerza y Angulo
-        # El siguiente codigo recorre los eventos del juego esperando si se pidio un evento de cierre,
-        # Si este sucede se cierra el programa
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
+    while aiming:  # Mientras el usuario esta decidiendo strength y angle
+        check_close()
 
-        pygame.event.pump()  # se esperan mas eventos
+        player_y = HEIGHT - FLOOR - 21
+
         BackGround.draw(screen)  # Se dibuja el fondo en screen
-        pygame.draw.line(
-            screen, (0, 0, 0), (21, HEIGHT - FLOOR - 21), (lastPoint[0], lastPoint[1]), 4
-        )  # Se dibuja la linea que va del puntero del cursor al inicio del jugador
-        for c in range(len(col)):  # Para cada dato del array col
-            drawText(screen, col[c], (10, 200 + 20 * c))  # Se dibuja texto en pantalla
-        drawText(
-            screen, CREDITS, (15, 15)
-        )  # Se dibuja el texto de la variable global Creditos en pantalla
-        lastPoint = [
-            pygame.mouse.get_pos()[0],
-            pygame.mouse.get_pos()[1],
-        ]  # Se asigna a lastPoint la posicion actual del cursor a traves de eventos
+        # Se dibuja la linea que va del puntero del cursor al inicio del jugador
+        pygame.draw.line(screen, (0, 0, 0), (21, player_y), (last_point[0], last_point[1]), 4)
 
-        if lastPoint[0] <= 21:  # Se fuerza a que la posicion menor en X sea 21
-            lastPoint[0] = 21
-        if (
-            lastPoint[1] >= HEIGHT - FLOOR - 21
-        ):  # Y se fuerza a que la posicion menor en Y sea 21 desde el piso
-            lastPoint[1] = HEIGHT - FLOOR - 21
+        # Se dibuja el texto de la variable global Creditos en pantalla
+        drawText(screen, CREDITS, (15, 15))
 
-        Fuerza = round(
-            math.sqrt((lastPoint[0] - 21.0) ** 2 + ((HEIGHT - FLOOR - 21.0 - lastPoint[1])) ** 2), 2
-        )  # Se pitagoras para conseguir la hipotenusa de las coordenadas
-        try:
-            Angulo = round(
-                math.degrees(
-                    math.atan((HEIGHT - FLOOR - lastPoint[1] - 21.0) / (lastPoint[0] - 21.0))
-                ),
-                2,
-            )  # Se consigue el angulo con arco tangente y/x
-        except ZeroDivisionError as detail:
-            Angulo = 90  # Si x es 0 se asigna al angulo 90
-        timeCalculated = round(
-            ((Fuerza * math.sin(math.radians(Angulo))) * 2) / GRAVITY, 2
-        )  # Se calcula el tiempo que va a demorar el jugador en llegar al piso
-        xfinal = round(
-            Fuerza * math.cos(math.radians(Angulo)) * timeCalculated, 2
-        )  # Se calcula la posicion en X final
-        ymedia = round(
-            (timeCalculated / 2) * (Fuerza * math.sin(math.radians(Angulo)))
-            + (GRAVITY / 2) * ((timeCalculated / 2) ** 2) * -1,
-            2,
-        )  # Se calcula la altura maxima
-
-        # Se pasan los datos anteriores a un array de textos para dibujar
-        col = [
-            "|F|:" + str(Fuerza) + " N/m",
-            "Angulo:" + str(Angulo) + "°",
-            "*Tiempo Final:" + str(timeCalculated) + " s",
-            "*Posicion en X Final: " + str(xfinal) + " m",
-            "*Posicion en Y Maxima: " + str(ymedia) + " m (Altura Maxima)",
+        # Se asigna a last_point la posicion actual del cursor a traves de eventos
+        last_point = [
+            pygame.mouse.get_pos()[0] if pygame.mouse.get_pos()[0] > 21 else 21,
+            pygame.mouse.get_pos()[1] if pygame.mouse.get_pos()[1] < player_y else player_y,
         ]
 
+        strength = round(
+            math.sqrt((last_point[0] - 21.0) ** 2 + ((player_y - last_point[1])) ** 2), 2,
+        )  # Se pitagoras para conseguir la hipotenusa de las coordenadas
+        try:
+            angle = round(
+                math.degrees(math.atan((player_y - last_point[1]) / (last_point[0] - 21.0))), 2,
+            )  # Se consigue el angulo con arco tangente y/x
+        except ZeroDivisionError:
+            angle = 90  # Si x es 0 se asigna al angulo 90
+        # Se calcula el tiempo que va a demorar el jugador en llegar al piso
+        formula_1 = strength * math.sin(math.radians(angle))
+        time_calculated = round((formula_1 * 2) / GRAVITY, 2)
+        # Se calcula la posicion en X final
+        xfinal = round(strength * math.cos(math.radians(angle)) * time_calculated, 2)
+        # Se calcula la altura maxima
+        ymedia = round(
+            (time_calculated / 2) * formula_1 + (GRAVITY / 2) * ((time_calculated / 2) ** 2) * -1,
+            2,
+        )
+
         # Se dibujan los enemigos en pantalla
-        for e in Enemy.listE:
-            e.draw(screen)
+        for enemy in Enemy.listE:
+            enemy.draw(screen)
+
+        for row in enumerate(
+            [
+                "|F|: %s N/m" % str(strength),
+                "angle: %s°" % str(angle),
+                "*Tiempo Final: %s s" % str(time_calculated),
+                "*Posicion en X Final: %s m" % str(xfinal),
+                "*Posicion en Y Maxima: %s m (Altura Maxima)" % str(ymedia),
+            ]
+        ):
+            drawText(screen, row[1], (10, 200 + 20 * row[0]))  # Se dibuja texto en pantalla
 
         # Se espera el evento de clic para lanzar
         if pygame.mouse.get_pressed()[0]:
             # Una vez se hace clic se crea el jugador y se inicia el siguiente while parando a este
-            player = Player("./assets/player.png", Fuerza, Angulo)
-            notTrue = False
+            player = Player("./assets/player.png", strength, angle)
+            aiming = False
         pygame.display.update()  # Se actualiza la pantalla
 
-    # Si alguno de los datos calculados es 0 se le asgina 1, estos datos son usados para el escalado de las graficas
-    # Por ende modificarlos no afectaria a ninguna muestra en el juego visual, se asigna a 1 para que la division no de error
+    # Si alguno de los datos calculados es 0 se le asgina 1, estos datos
+    # son usados para el escalado de las graficas
+    # Por ende modificarlos no afectaria a ninguna muestra en el juego visual,
+    # se asigna a 1 para que la division no de error
     if ymedia == 0:
         ymedia = 1
     pvgo = player.vy
@@ -105,7 +107,7 @@ def start(screen, clock):
         pvgo = 1
     if xfinal == 0:
         xfinal = 1
-    data1 = timeCalculated * 1000
+    data1 = time_calculated * 1000
     if data1 == 0:
         data1 = 1
 
@@ -115,70 +117,56 @@ def start(screen, clock):
     Graph(45, "y (m) ", "t (s)", -1, textGraphT, [[0, 0]], data1, ymedia)
     Graph(45, "x (m) ", "t (s)", 1, textGraphT, [[0, 0]], data1, xfinal)
 
-    startTick = (
-        pygame.time.get_ticks()
-    )  # Se consigue el tiempo inicial del juego, ya que el tiempo empieza a incrementarse una vez que se inicia el juego.
-    BackGround(0, 0, "./assets/bg.png")  # Se crea el nuevo fondo
-    updateTime = (
-        True  # Esta variable controlara si hay que seguir escribiendo el aumento del tiempo
-    )
-    elapsed = 0  # Esta variable tendra lo que demoro en ejecutar el codigo
-    while notTrue == False:
-        seconds = elapsed  # Se asigna lo que se demoro en ejecutar el codigo al dato de la ultima linea de este while
-        if (
-            pygame.time.get_ticks() - startTick
-        ) - seconds >= 0:  # Si este delay no hace ser al tiempo negativo
-            time = (
-                pygame.time.get_ticks() - startTick
-            ) - seconds  # Se hace el calculo de tiempo real, es decir el tiempo actual menos el tiempo inicial.
-        else:
-            time = (
-                pygame.time.get_ticks() - startTick
-            )  # Para prevenir errores si la resta da negativo porque se demoro en entrar al codigo se evita hacer eso
+    # Se consigue el tiempo inicial del juego, ya que el tiempo
+    # empieza a incrementarse una vez que se inicia el juego.
+    start_tick = pygame.time.get_ticks()
 
-        # Se esperan eventos de cierre
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-                break
-        pygame.event.pump()
+    BackGround(0, 0, "./assets/bg.png")  # Se crea el nuevo fondo
+
+    # Esta variable controlara si hay que seguir escribiendo el aumento del tiempo
+    update_time = True
+
+    elapsed = 0  # Esta variable tendra lo que demoro en ejecutar el codigo
+    half_gravity = GRAVITY / 2
+    while not aiming:
+        # Se asigna lo que se demoro en ejecutar el codigo al dato de la ultima linea de este while
+        calculated_value = pygame.time.get_ticks() - start_tick
+        time = calculated_value if calculated_value - elapsed < 0 else calculated_value - elapsed
+
+        check_close()
         if pygame.mouse.get_pressed()[2]:  # Si el usuario hace clic derecho se termina el while
             break
 
-        if (
-            player.rect.bottom < HEIGHT - FLOOR or time < 100
-        ):  # Si la parte de abajo del jugador es menor que la altura del piso, siendo q el Y se incrementa hacia abajo
+        if player.rect.bottom < HEIGHT - FLOOR or time < 100:
+            # Si la parte de abajo del jugador es menor que la altura del piso,
+            # siendo q el Y se incrementa hacia abajo
             # Normalmente esto seria si la parte de abajo del jugador es mayor al piso
-            player.rect.y = (
-                player.y - player.vy * (time / 1000.0) + (GRAVITY / 2) * ((time / 1000.0) ** 2)
-            )  # Se realiza el movimiento con la Ley Horaria de MURV en Y
-            if (
-                player.rect.left >= 0 or player.rect.right <= WIDTH
-            ):  # Si el jugador se encuentra dentro de la pantalla en X
-                player.rect.x = player.x + player.vx * (
-                    time / 1000.0
-                )  # Se mueve al jugador en X con MRU
-        elif updateTime == True:  # Si el jugador se da contra el piso
+            # Se realiza el movimiento con la Ley Horaria de MURV en Y
+            time_ms = time / 1000.0
+            player.rect.y = player.y - player.vy * time_ms + half_gravity * (time_ms ** 2)
+            if player.rect.left >= 0 or player.rect.right <= WIDTH:
+                # Si el jugador se encuentra dentro de la pantalla en X
+                # Se mueve al jugador en X con MRU
+                player.rect.x = player.x + player.vx * time_ms
+        elif update_time:
+            # Si el jugador se da contra el piso
             Graph.active = False  # Se dejan de agregar valores a las graficas
-            updateTime = time  # Se deja de actualizar el tiempo
+            update_time = time  # Se deja de actualizar el tiempo
 
-        if Enemy.falling == True or (
+        if Enemy.falling or (
             player.rect.bottom > 0
             and player.rect.right >= Enemy.listE[len(Enemy.listE) - 1].rect.left
             and player.rect.left <= Enemy.listE[0].rect.right
-        ):  # Si hay enemigos cayendo o el jugador esta en el area de enemigos
+        ):
+            # Si hay enemigos cayendo o el jugador esta en el area de enemigos
             Enemy.CheckCol(time)  # Se comprueba colisiones y caidas de enemigos
             player.CheckCol(Enemy.listE)  # Se comprueban colisiones de jugador con enemigos
 
-        if updateTime == True:  # Si se tiene que actualizar el tiempo en variables
-            drawHandler(
-                screen, time, player, Graph.Array, Enemy, BackGround
-            )  # Se da el tiempo normal
+        if update_time:  # Si se tiene que actualizar el tiempo en variables
+            # Se da el tiempo normal
+            drawHandler(screen, time, player, Graph.Array, Enemy, BackGround)
         else:
-            drawHandler(
-                screen, updateTime, player, Graph.Array, Enemy, BackGround
-            )  # Si no se da el guardado cuando el jugador se da contra el piso
-        elapsed = clock.tick(
-            120
-        )  # Se asigna el maximo de FPS a 120 y esta variable es la que de la diferencia
+            # Si no se da el guardado cuando el jugador se da contra el piso
+            drawHandler(screen, update_time, player, Graph.Array, Enemy, BackGround)
+        # Se asigna el maximo de FPS a 120 y esta variable es la que de la diferencia
+        elapsed = clock.tick(120)

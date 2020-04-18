@@ -2,6 +2,7 @@ import pygame, math
 
 
 from src.config import FLOOR, HEIGHT
+from src.classes.enemy import Enemy
 
 
 class Player:

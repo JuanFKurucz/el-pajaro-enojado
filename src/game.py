@@ -1,31 +1,12 @@
-import pygame, math, random
-from OtherFunctions import *
-from GameClasses import *
-from Global import *
-from pygame.locals import *
-
-# Este archivo se encarga de las funciones principales del juego
+import math
 
 
-def main():
-    pygame.init()  # se inicia el modulo de PyGame
-    screen = pygame.display.set_mode(
-        size
-    )  # Se especifica el ancho de la ventana como size siendo este 800,600. Variable size extraida del archivo Global.py
-    pygame.display.set_caption(
-        "El pajaro enojado"
-    )  # Se le agrega el titulo 'El pajaro enojado' a la ventana del juego.
-    Enemys.Clean()  # Se limpia el array que guarda los enemigos en pantalla
-    BackGround.Clean()  # Se limpia el array que guarda los fondos a dibujar
-    Graphs.Clean()  # Se limpia el array que guarda las graficas a dibujar
+import pygame
 
-    # El siguiente codigo genera Enemigos, siendo estos las cajas.
-    for y in range(1, 20):
-        for x in range(5, 8):
-            Enemys(width - 200 - 30 * x, height - 15 * y, "./assets/box.png")
 
-    clock = pygame.time.Clock()  # se declara clock para uso futuro
-    start(screen, clock)  # Se llama a la funcion start pasandole las variables screen y clock
+from src.methods import drawText, textGraphXY, textGraphT, textGraphTV, drawHandler
+from src.classes import BackGround, Enemy, Graph, Player
+from src.config import WIDTH, HEIGHT, FLOOR, CREDITS, GRAVITY
 
 
 def start(screen, clock):
@@ -33,7 +14,7 @@ def start(screen, clock):
     notTrue = True  # Control del while de tiro y resultado. Cuando es True es cuando el usuario esta asignando el angulo y fuerza. Cuando es False es cuando el jugador se esta moviendo
     lastPoint = [
         21,
-        height - 21,
+        HEIGHT - 21,
     ]  # Variable que guarda el ultimo punto en donde estaba el cursor, con limitaciones
     col = []  # Variable que guardara textos a imprimir en pantalla
     BackGround(0, 0, "./assets/bgi.png")  # Se crea un objeto fondo
@@ -52,12 +33,12 @@ def start(screen, clock):
         pygame.event.pump()  # se esperan mas eventos
         BackGround.draw(screen)  # Se dibuja el fondo en screen
         pygame.draw.line(
-            screen, (0, 0, 0), (21, height - floor - 21), (lastPoint[0], lastPoint[1]), 4
+            screen, (0, 0, 0), (21, HEIGHT - FLOOR - 21), (lastPoint[0], lastPoint[1]), 4
         )  # Se dibuja la linea que va del puntero del cursor al inicio del jugador
         for c in range(len(col)):  # Para cada dato del array col
             drawText(screen, col[c], (10, 200 + 20 * c))  # Se dibuja texto en pantalla
         drawText(
-            screen, Creditos, (15, 15)
+            screen, CREDITS, (15, 15)
         )  # Se dibuja el texto de la variable global Creditos en pantalla
         lastPoint = [
             pygame.mouse.get_pos()[0],
@@ -67,31 +48,31 @@ def start(screen, clock):
         if lastPoint[0] <= 21:  # Se fuerza a que la posicion menor en X sea 21
             lastPoint[0] = 21
         if (
-            lastPoint[1] >= height - floor - 21
+            lastPoint[1] >= HEIGHT - FLOOR - 21
         ):  # Y se fuerza a que la posicion menor en Y sea 21 desde el piso
-            lastPoint[1] = height - floor - 21
+            lastPoint[1] = HEIGHT - FLOOR - 21
 
         Fuerza = round(
-            math.sqrt((lastPoint[0] - 21.0) ** 2 + ((height - floor - 21.0 - lastPoint[1])) ** 2), 2
+            math.sqrt((lastPoint[0] - 21.0) ** 2 + ((HEIGHT - FLOOR - 21.0 - lastPoint[1])) ** 2), 2
         )  # Se pitagoras para conseguir la hipotenusa de las coordenadas
         try:
             Angulo = round(
                 math.degrees(
-                    math.atan((height - floor - lastPoint[1] - 21.0) / (lastPoint[0] - 21.0))
+                    math.atan((HEIGHT - FLOOR - lastPoint[1] - 21.0) / (lastPoint[0] - 21.0))
                 ),
                 2,
             )  # Se consigue el angulo con arco tangente y/x
         except ZeroDivisionError as detail:
             Angulo = 90  # Si x es 0 se asigna al angulo 90
         timeCalculated = round(
-            ((Fuerza * math.sin(math.radians(Angulo))) * 2) / g, 2
+            ((Fuerza * math.sin(math.radians(Angulo))) * 2) / GRAVITY, 2
         )  # Se calcula el tiempo que va a demorar el jugador en llegar al piso
         xfinal = round(
             Fuerza * math.cos(math.radians(Angulo)) * timeCalculated, 2
         )  # Se calcula la posicion en X final
         ymedia = round(
             (timeCalculated / 2) * (Fuerza * math.sin(math.radians(Angulo)))
-            + (g / 2) * ((timeCalculated / 2) ** 2) * -1,
+            + (GRAVITY / 2) * ((timeCalculated / 2) ** 2) * -1,
             2,
         )  # Se calcula la altura maxima
 
@@ -105,7 +86,7 @@ def start(screen, clock):
         ]
 
         # Se dibujan los enemigos en pantalla
-        for e in Enemys.listE:
+        for e in Enemy.listE:
             e.draw(screen)
 
         # Se espera el evento de clic para lanzar
@@ -129,10 +110,10 @@ def start(screen, clock):
         data1 = 1
 
     # Se crean objetos de clase Garfica
-    Graphs(175, "y (m)", "x (m)", -1, textGraphXY, [[0, 0]], xfinal, ymedia)
-    Graphs(45, "Vy", "t (s)", 1, textGraphTV, [], data1, pvgo)
-    Graphs(45, "y (m) ", "t (s)", -1, textGraphT, [[0, 0]], data1, ymedia)
-    Graphs(45, "x (m) ", "t (s)", 1, textGraphT, [[0, 0]], data1, xfinal)
+    Graph(175, "y (m)", "x (m)", -1, textGraphXY, [[0, 0]], xfinal, ymedia)
+    Graph(45, "Vy", "t (s)", 1, textGraphTV, [], data1, pvgo)
+    Graph(45, "y (m) ", "t (s)", -1, textGraphT, [[0, 0]], data1, ymedia)
+    Graph(45, "x (m) ", "t (s)", 1, textGraphT, [[0, 0]], data1, xfinal)
 
     startTick = (
         pygame.time.get_ticks()
@@ -166,44 +147,38 @@ def start(screen, clock):
             break
 
         if (
-            player.rect.bottom < height - floor or time < 100
+            player.rect.bottom < HEIGHT - FLOOR or time < 100
         ):  # Si la parte de abajo del jugador es menor que la altura del piso, siendo q el Y se incrementa hacia abajo
             # Normalmente esto seria si la parte de abajo del jugador es mayor al piso
             player.rect.y = (
-                player.y - player.vy * (time / 1000.0) + (g / 2) * ((time / 1000.0) ** 2)
+                player.y - player.vy * (time / 1000.0) + (GRAVITY / 2) * ((time / 1000.0) ** 2)
             )  # Se realiza el movimiento con la Ley Horaria de MURV en Y
             if (
-                player.rect.left >= 0 or player.rect.right <= width
+                player.rect.left >= 0 or player.rect.right <= WIDTH
             ):  # Si el jugador se encuentra dentro de la pantalla en X
                 player.rect.x = player.x + player.vx * (
                     time / 1000.0
                 )  # Se mueve al jugador en X con MRU
         elif updateTime == True:  # Si el jugador se da contra el piso
-            Graphs.active = False  # Se dejan de agregar valores a las graficas
+            Graph.active = False  # Se dejan de agregar valores a las graficas
             updateTime = time  # Se deja de actualizar el tiempo
 
-        if Enemys.falling == True or (
+        if Enemy.falling == True or (
             player.rect.bottom > 0
-            and player.rect.right >= Enemys.listE[len(Enemys.listE) - 1].rect.left
-            and player.rect.left <= Enemys.listE[0].rect.right
+            and player.rect.right >= Enemy.listE[len(Enemy.listE) - 1].rect.left
+            and player.rect.left <= Enemy.listE[0].rect.right
         ):  # Si hay enemigos cayendo o el jugador esta en el area de enemigos
-            Enemys.CheckCol(time)  # Se comprueba colisiones y caidas de enemigos
-            player.CheckCol(Enemys.listE)  # Se comprueban colisiones de jugador con enemigos
+            Enemy.CheckCol(time)  # Se comprueba colisiones y caidas de enemigos
+            player.CheckCol(Enemy.listE)  # Se comprueban colisiones de jugador con enemigos
 
         if updateTime == True:  # Si se tiene que actualizar el tiempo en variables
             drawHandler(
-                screen, time, player, Graphs.Array, Enemys, BackGround
+                screen, time, player, Graph.Array, Enemy, BackGround
             )  # Se da el tiempo normal
         else:
             drawHandler(
-                screen, updateTime, player, Graphs.Array, Enemys, BackGround
+                screen, updateTime, player, Graph.Array, Enemy, BackGround
             )  # Si no se da el guardado cuando el jugador se da contra el piso
         elapsed = clock.tick(
             120
         )  # Se asigna el maximo de FPS a 120 y esta variable es la que de la diferencia
-    main()  # Una vez haga clic derecho el juego se reiniciara llamando a main
-
-
-if __name__ == "__main__":
-    main()
-input("ok")

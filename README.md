@@ -10,4 +10,10 @@ Run
 pip install -r requirements.txt
 ```
 
-And then execute start.bat
+And then execute
+
+```
+python src/main.py
+```
+
+or run start.bat

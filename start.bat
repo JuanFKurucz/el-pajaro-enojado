@@ -1,2 +1,2 @@
 @echo off
-python src/juego.py
+python src/main.py

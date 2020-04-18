@@ -1,5 +1,7 @@
 import pygame, math
-from Global import *
+
+
+from src.config import HEIGHT, FLOOR, GRAVITY
 
 # Este archivo se encarga de funciones a las cuales se llamaran
 
@@ -11,14 +13,14 @@ def drawText(screen, text, pos):
 
 def showVars(screen, player, tf, ballXY, Enemys):
     # Funcion que muestra variables en pantalla
-    startPos = height - floor
+    startPos = HEIGHT - FLOOR
     col0 = [
         "|F|:" + str(round(player.fuerza, 2)) + " N/m",
         "Angulo:" + str(round(player.angulo, 2)) + "°",
         "Tiempo Inicial: 0" + " s",
         "Tiempo Actual: " + str(round((tf / 1000.0), 2)) + " s",
         "*Tiempo Final:"
-        + str(round(((player.fuerza * math.sin(math.radians(player.angulo))) * 2) / g, 2))
+        + str(round(((player.fuerza * math.sin(math.radians(player.angulo))) * 2) / GRAVITY, 2))
         + " s",
     ]
     col1 = [
@@ -31,15 +33,16 @@ def showVars(screen, player, tf, ballXY, Enemys):
         + str(
             round(
                 player.x
-                + (((player.fuerza * math.sin(math.radians(player.angulo))) * 2) / g) * player.vx,
+                + (((player.fuerza * math.sin(math.radians(player.angulo))) * 2) / GRAVITY)
+                * player.vx,
                 2,
             )
         )
         + " m",
         "Eje Y (MRUV):",
         "Velocidad Inicial: " + str(round(player.vy, 2)) + " m/s",
-        "Velocidad Actual: " + str(round(player.vy - g * (tf / 1000.0), 2)) + " m/s",
-        "Posicion Inicial: " + str(round(height - floor - player.y - player.height, 2)) + " m",
+        "Velocidad Actual: " + str(round(player.vy - GRAVITY * (tf / 1000.0), 2)) + " m/s",
+        "Posicion Inicial: " + str(round(HEIGHT - FLOOR - player.y - player.height, 2)) + " m",
         "Posicion Actual: " + str(round(ballXY[len(ballXY) - 1][1], 2)) + " m",
         "*Posicion Final: 0 m",
     ]
@@ -53,6 +56,7 @@ def showVars(screen, player, tf, ballXY, Enemys):
         drawText(screen, col1[c], (220 + 320 * (int(c / 6)), startPos + 15 * ((c) % 6)))
     for c in range(len(col3)):
         drawText(screen, col3[c], (10, 180 + 20 * c))
+
 
 def textGraphXY(self, screen):
     # Funcion que muestra datos en graficas
@@ -116,7 +120,7 @@ def drawHandler(screen, time, player, Graphs, Enemys, BackGround):
             player.rect.x,
             500 - player.rect.bottom,
         ],  # Crea todos los datos en este momento para cada grafica
-        [time, -1 * player.vy + g * (time / 1000.0)],
+        [time, -1 * player.vy + GRAVITY * (time / 1000.0)],
         [time, 500 - player.rect.bottom],
         [time, player.rect.x * -1],
     ]
@@ -124,4 +128,3 @@ def drawHandler(screen, time, player, Graphs, Enemys, BackGround):
         Graphs[i].draw(screen, dataGraphs[i])
     showVars(screen, player, time, Graphs[0].past, Enemys)  # Se dibuja cada variable en pantalla
     pygame.display.update()  # Se actualiza la pantalla
-

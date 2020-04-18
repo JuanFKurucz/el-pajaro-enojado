@@ -24,19 +24,18 @@ class Player:
         self.rect.x = self.x
         self.rect.y = self.y
 
-    def CheckCol(self, elements):
+    def check_collision(self, elements):
         # Funcion de colision de jugador con cajas
-        for e in elements:
+        for enemy in elements:
             if (
-                e.dibujado == True
-                and self.rect.x < e.rect.right
-                and self.rect.right > e.rect.x
-                and self.rect.y < e.rect.bottom
-                and self.rect.bottom > e.rect.y
+                self.rect.x < enemy.rect.right
+                and self.rect.right > enemy.rect.x
+                and self.rect.y < enemy.rect.bottom
+                and self.rect.bottom > enemy.rect.y
             ):
                 # Si la caja esta siendo dibujada y el jugador se encuentra dentro de la caja
                 self.score += 1
-                e.destroy()
+                enemy.destroy()
 
     def draw(self, screen):
         screen.blit(

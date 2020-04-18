@@ -171,13 +171,13 @@ def start(screen, clock, background):
             update_time = time  # Se deja de actualizar el tiempo
 
         if Enemy.falling or (
-            player.rect.bottom > 0
-            and player.rect.right >= Enemy.list_objects[len(Enemy.list_objects) - 1].rect.left
-            and player.rect.left <= Enemy.list_objects[0].rect.right
+            player.rect.right >= Enemy.area_objects[0] and player.rect.left <= Enemy.area_objects[1]
         ):
             # Si hay enemigos cayendo o el jugador esta en el area de enemigos
-            Enemy.CheckCol(time)  # Se comprueba colisiones y caidas de enemigos
-            player.CheckCol(Enemy.list_objects)  # Se comprueban colisiones de jugador con enemigos
+            Enemy.check_collision(time)
+            player.check_collision(
+                Enemy.get_active_enemies()
+            )  # Se comprueban colisiones de jugador con enemigos
 
         if update_time:  # Si se tiene que actualizar el tiempo en variables
             # Se da el tiempo normal

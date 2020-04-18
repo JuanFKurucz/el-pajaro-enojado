@@ -68,16 +68,19 @@ class Enemy:
             if (search_box and search_box.rect.y > enemy.rect.bottom != 0) or (
                 not search_box and enemy.rect.bottom < HEIGHT - FLOOR
             ):
-                if enemy.ti == 0:
-                    # Se asgina el tiempo inicial
-                    # compensate for air loss
-                    enemy.ti = search_box.ti if search_box and search_box.ti > 0 else time
                 # Si el indice de la caja existe
                 # O si no cae hasta tocar contra el suelo debido a que no tiene mas cajas abajo
-                # Movimiento de caida libre mruv
 
+                if enemy.ti == 0:
+                    # Se asgina el tiempo inicial
+                    enemy.ti = search_box.ti if search_box and search_box.ti > 0 else time
+
+                # Movimiento de caida libre mruv
                 enemy.rect.y = enemy.initial_y + (GRAVITY / 2) * (((time - enemy.ti) / 1000.0) ** 2)
-                falling_check += 1
+                if search_box and enemy.rect.y > search_box.rect.bottom:
+                    enemy.rect.y = search_box.rect.bottom
+                else:
+                    falling_check += 1
         Enemy.falling = falling_check > 0
 
     def reset(self):

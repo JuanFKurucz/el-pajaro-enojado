@@ -48,31 +48,19 @@ class Enemy:
             #
             # Podemos obtener la caja que tiene abajo haciendo el indice de esta caja -3
             # Se realizo de esta forma para poder hacer real el movimiento de cada caja ya que se actualiza en orden de caida
+            if enemy.ti == 0:
+                # Se asgina el tiempo inicial
+                enemy.ti = time
             search_box = None
             for index in range(enemy.id - 3, -1, -3):
                 if Enemy.list_objects[index].dibujado:
                     search_box = Enemy.list_objects[index]
                     break
-            if search_box:
+            if (search_box and search_box.rect.y - enemy.rect.bottom != 0) or (
+                not search_box and enemy.rect.bottom < HEIGHT - FLOOR
+            ):
                 # Si el indice de la caja existe
-                if (
-                    enemy.rect.bottom <= search_box.rect.y
-                    and search_box.rect.y - enemy.rect.bottom != 0
-                ):
-                    # Colision contra la siguiente caja
-                    if enemy.ti == 0:
-                        # Se asgina el tiempo inicial
-                        enemy.ti = time
-                    # Movimiento de caida libre mruv
-                    enemy.rect.y = enemy.initial_y + (GRAVITY / 2) * (
-                        ((time - enemy.ti) / 1000.0) ** 2
-                    )
-                    falling_check += 1
-            elif enemy.rect.bottom < HEIGHT - FLOOR:
-                # Si no cae hasta tocar contra el suelo debido a que no tiene mas cajas abajo
-                if enemy.ti == 0:
-                    # Se asgina el tiempo inicial
-                    enemy.ti = time
+                # O si no cae hasta tocar contra el suelo debido a que no tiene mas cajas abajo
                 # Movimiento de caida libre mruv
                 enemy.rect.y = enemy.initial_y + (GRAVITY / 2) * (((time - enemy.ti) / 1000.0) ** 2)
                 falling_check += 1

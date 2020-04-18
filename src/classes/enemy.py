@@ -5,24 +5,22 @@ from src.config import FLOOR, HEIGHT, GRAVITY
 
 
 class Enemy:
-    listE = []  # Lista donde se guardaran objetos caja
+    list_objects = []  # Lista donde se guardaran objetos caja
     destroyed = 0  # Conteo de cuantos se destruyeron en total
     falling = False  # Si hay cajas cayendo
 
-    def __init__(self, x, y, img):
+    def __init__(self, initial_x, initial_y, img):
         self.image = pygame.image.load(img)
-        self.x = x
-        self.y = y - FLOOR
-        self.width = 15
-        self.height = 15
+        self.initial_x = initial_x
+        self.initial_y = initial_y - FLOOR
         self.rect = self.image.get_rect()
-        self.rect.x = self.x
-        self.rect.y = self.y
+        self.rect.x = self.initial_x
+        self.rect.y = self.initial_y
         self.dibujado = True
-        self.ti = (
-            0  # Se creara un movimiento de caida libre con un tiempo inicial obtenido a futuro
-        )
-        Enemy.listE.append(self)
+        # Se creara un movimiento de caida libre con un tiempo inicial obtenido a futuro
+        self.ti = 0
+        self.id = len(Enemy.list_objects)
+        Enemy.list_objects.append(self)
 
     def destroy(self):
         # Funcion que es llamada cuando el jugador colisiona con la caja
@@ -38,8 +36,9 @@ class Enemy:
     @classmethod
     def CheckCol(cls, time):
         # Funcion de colisiones entre cajas y gravedad de las mismas
-        fallingCheck = 0  # Si hay cajas cayendo
-        for e in range(len(Enemy.listE)):
+        falling_check = 0  # Si hay cajas cayendo
+        boxes = [e for e in Enemy.list_objects if e.dibujado]
+        for enemy in boxes:
             # por cada caja en la lista de cajas
             # Como las cajas estan astutamente creadas en columnas de forma
             # 			11	10	9
@@ -49,42 +48,44 @@ class Enemy:
             #
             # Podemos obtener la caja que tiene abajo haciendo el indice de esta caja -3
             # Se realizo de esta forma para poder hacer real el movimiento de cada caja ya que se actualiza en orden de caida
-            multiplicador = 3
-            while e - multiplicador >= 0 and Enemy.listE[e - multiplicador].dibujado == False:
-                # no se esta dibujando se chequea la siguiente debido a que quiere decir que el jugador impacto con la misma.
-                multiplicador += 3
-            if e - multiplicador >= 0:
+            search_box = None
+            for index in range(enemy.id - 3, -1, -3):
+                if Enemy.list_objects[index].dibujado:
+                    search_box = Enemy.list_objects[index]
+                    break
+            if search_box:
                 # Si el indice de la caja existe
                 if (
-                    Enemy.listE[e].rect.bottom <= Enemy.listE[e - multiplicador].rect.y
-                    and Enemy.listE[e - multiplicador].rect.y - Enemy.listE[e].rect.bottom != 0
+                    enemy.rect.bottom <= search_box.rect.y
+                    and search_box.rect.y - enemy.rect.bottom != 0
                 ):
                     # Colision contra la siguiente caja
-                    if Enemy.listE[e].ti == 0:
-                        Enemy.listE[e].ti = time  # Se asgina el tiempo inicial
+                    if enemy.ti == 0:
+                        # Se asgina el tiempo inicial
+                        enemy.ti = time
                     # Movimiento de caida libre mruv
-                    Enemy.listE[e].rect.y = Enemy.listE[e].y + (GRAVITY / 2) * (
-                        ((time - Enemy.listE[e].ti) / 1000.0) ** 2
+                    enemy.rect.y = enemy.initial_y + (GRAVITY / 2) * (
+                        ((time - enemy.ti) / 1000.0) ** 2
                     )
-                    fallingCheck += 1
-            elif Enemy.listE[e].rect.bottom < HEIGHT - FLOOR:
+                    falling_check += 1
+            elif enemy.rect.bottom < HEIGHT - FLOOR:
                 # Si no cae hasta tocar contra el suelo debido a que no tiene mas cajas abajo
-                if Enemy.listE[e].ti == 0:
-                    Enemy.listE[e].ti = time  # Se asgina el tiempo inicial
+                if enemy.ti == 0:
+                    # Se asgina el tiempo inicial
+                    enemy.ti = time
                 # Movimiento de caida libre mruv
-                Enemy.listE[e].rect.y = Enemy.listE[e].y + (GRAVITY / 2) * (
-                    ((time - Enemy.listE[e].ti) / 1000.0) ** 2
-                )
-                fallingCheck += 1
-        else:
-            if fallingCheck > 0:
-                # Si hay cajas cayendo
-                Enemy.falling = True
-            else:
-                Enemy.falling = False
+                enemy.rect.y = enemy.initial_y + (GRAVITY / 2) * (((time - enemy.ti) / 1000.0) ** 2)
+                falling_check += 1
+        Enemy.falling = falling_check > 0
+
+    def reset(self):
+        self.rect.x = self.initial_x
+        self.rect.y = self.initial_y
+        self.dibujado = True
 
     @classmethod
     def Clean(cls):
         # Funcion que limpia los objetos cajas y resetea el estado de caida
         Enemy.falling = False
-        Enemy.listE = []
+        for enemy in Enemy.list_objects:
+            enemy.reset()

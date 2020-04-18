@@ -110,11 +110,11 @@ def textGraphTV(self, screen):
         drawText(screen, texts[t], texts[t + 1])
 
 
-def drawHandler(screen, time, player, Graphs, Enemys, BackGround):
+def drawHandler(screen, time, player, Graphs, Enemys, background):
     # Funcion que se encarga de realizar todos los dibujos y pasarle los datos a las graficas
-    BackGround.draw(screen)  # Dibuja fondo
+    background.draw(screen)  # Dibuja fondo
     player.draw(screen)  # Dibuja jugador
-    for enemy in Enemys.listE:  # Dibuja todas las cajas
+    for enemy in Enemys.list_objects:  # Dibuja todas las cajas
         enemy.draw(screen)
 
     data_graphs = [

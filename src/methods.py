@@ -1,4 +1,7 @@
-import pygame, math
+import math
+
+
+import pygame
 
 
 from src.config import HEIGHT, FLOOR, GRAVITY
@@ -6,12 +9,12 @@ from src.config import HEIGHT, FLOOR, GRAVITY
 # Este archivo se encarga de funciones a las cuales se llamaran
 
 
-def drawText(screen, text, pos):
+def draw_text(screen, text, pos):
     # Funcion que dibuja texto en pantalla
     screen.blit(pygame.font.SysFont("monospace", 12).render(text, 1, (0, 0, 0)), pos)
 
 
-def showVars(screen, player, tf, ballXY, Enemys):
+def show_vars(screen, player, tf, ballXY, Enemys):
     # Funcion que muestra variables en pantalla
     start_pos = HEIGHT - FLOOR
     col0 = [
@@ -49,18 +52,18 @@ def showVars(screen, player, tf, ballXY, Enemys):
         "Cajas Destruidas Totales: %s" % str(Enemys.destroyed),
     ]
     for enum_col in enumerate(col0):
-        drawText(screen, enum_col[1], (20, 10 + start_pos + 15 * enum_col[0]))
+        draw_text(screen, enum_col[1], (20, 10 + start_pos + 15 * enum_col[0]))
     for enum_col in enumerate(col1):
-        drawText(
+        draw_text(
             screen,
             enum_col[1],
             (220 + 320 * (int(enum_col[0] / 6)), start_pos + 15 * ((enum_col[0]) % 6)),
         )
     for enum_col in enumerate(col3):
-        drawText(screen, enum_col[1], (10, 180 + 20 * enum_col[0]))
+        draw_text(screen, enum_col[1], (10, 180 + 20 * enum_col[0]))
 
 
-def textGraphXY(self, screen):
+def text_graph_XY(self, screen):
     # Funcion que muestra datos en graficas
     texts = [
         str(round(self.topeMax[1], 2)),
@@ -76,10 +79,10 @@ def textGraphXY(self, screen):
         ),
     ]
     for t in range(0, len(texts), 2):
-        drawText(screen, texts[t], texts[t + 1])
+        draw_text(screen, texts[t], texts[t + 1])
 
 
-def textGraphT(self, screen):
+def text_graph_T(self, screen):
     # Funcion que muestra datos en graficas
     texts = [
         str(math.fabs(round(self.topeMin[1] - self.topeMax[1], 2))),
@@ -95,10 +98,10 @@ def textGraphT(self, screen):
         ),
     ]
     for t in range(0, len(texts), 2):
-        drawText(screen, texts[t], texts[t + 1])
+        draw_text(screen, texts[t], texts[t + 1])
 
 
-def textGraphTV(self, screen):
+def text_graph_TV(self, screen):
     # Funcion que muestra datos en graficas
     texts = [
         str(round(self.topeMax[1], 2) * -1),
@@ -107,10 +110,10 @@ def textGraphTV(self, screen):
         (self.x - 20, self.topeMin[0]),
     ]
     for t in range(0, len(texts), 2):
-        drawText(screen, texts[t], texts[t + 1])
+        draw_text(screen, texts[t], texts[t + 1])
 
 
-def drawHandler(screen, time, player, Graphs, Enemys, background):
+def draw_handler(screen, time, player, Graphs, Enemys, background):
     # Funcion que se encarga de realizar todos los dibujos y pasarle los datos a las graficas
     background.draw(screen)  # Dibuja fondo
     player.draw(screen)  # Dibuja jugador
@@ -129,5 +132,5 @@ def drawHandler(screen, time, player, Graphs, Enemys, background):
     for enum_graph in enumerate(Graphs):
         # Por cada grafica, se dibuja y se le asignan los nuevos datos
         enum_graph[1].draw(screen, data_graphs[enum_graph[0]])
-    showVars(screen, player, time, Graphs[0].past, Enemys)  # Se dibuja cada variable en pantalla
+    show_vars(screen, player, time, Graphs[0].past, Enemys)  # Se dibuja cada variable en pantalla
     pygame.display.update()  # Se actualiza la pantalla

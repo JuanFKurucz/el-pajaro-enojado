@@ -4,7 +4,7 @@ import math
 import pygame
 
 
-from src.methods import drawText, textGraphXY, textGraphT, textGraphTV, drawHandler
+from src.methods import draw_text, text_graph_XY, text_graph_T, text_graph_TV, draw_handler
 from src.classes import BackGround, Enemy, Graph, Player
 from src.config import WIDTH, HEIGHT, FLOOR, CREDITS, GRAVITY
 
@@ -55,7 +55,7 @@ def start(screen, clock, background):
         )
 
         # Se dibuja el texto de la variable global Creditos en pantalla
-        drawText(screen, CREDITS, (15, 15))
+        draw_text(screen, CREDITS, (15, 15))
 
         # Se asigna a last_cursor_position la posicion actual del cursor a traves de eventos
         last_cursor_position = [
@@ -104,7 +104,7 @@ def start(screen, clock, background):
                 "*Posicion en Y Maxima: %s m (Altura Maxima)" % str(ymedia),
             ]
         ):
-            drawText(screen, row[1], (10, 200 + 20 * row[0]))  # Se dibuja texto en pantalla
+            draw_text(screen, row[1], (10, 200 + 20 * row[0]))  # Se dibuja texto en pantalla
 
         # Se espera el evento de clic para lanzar
         if pygame.mouse.get_pressed()[0]:
@@ -129,10 +129,10 @@ def start(screen, clock, background):
         data1 = 1
 
     # Se crean objetos de clase Garfica
-    Graph(175, "y (m)", "x (m)", -1, textGraphXY, [[0, 0]], xfinal, ymedia)
-    Graph(45, "Vy", "t (s)", 1, textGraphTV, [], data1, pvgo)
-    Graph(45, "y (m) ", "t (s)", -1, textGraphT, [[0, 0]], data1, ymedia)
-    Graph(45, "x (m) ", "t (s)", 1, textGraphT, [[0, 0]], data1, xfinal)
+    Graph(175, "y (m)", "x (m)", -1, text_graph_XY, [[0, 0]], xfinal, ymedia)
+    Graph(45, "Vy", "t (s)", 1, text_graph_TV, [], data1, pvgo)
+    Graph(45, "y (m) ", "t (s)", -1, text_graph_T, [[0, 0]], data1, ymedia)
+    Graph(45, "x (m) ", "t (s)", 1, text_graph_T, [[0, 0]], data1, xfinal)
 
     # Se consigue el tiempo inicial del juego, ya que el tiempo
     # empieza a incrementarse una vez que se inicia el juego.
@@ -175,15 +175,14 @@ def start(screen, clock, background):
         ):
             # Si hay enemigos cayendo o el jugador esta en el area de enemigos
             Enemy.check_collision(time)
-            player.check_collision(
-                Enemy.get_active_enemies()
-            )  # Se comprueban colisiones de jugador con enemigos
+            # Se comprueban colisiones de jugador con enemigos
+            player.check_collision(Enemy.get_active_enemies())
 
         if update_time:  # Si se tiene que actualizar el tiempo en variables
             # Se da el tiempo normal
-            drawHandler(screen, time, player, Graph.Array, Enemy, background)
+            draw_handler(screen, time, player, Graph.Array, Enemy, background)
         else:
             # Si no se da el guardado cuando el jugador se da contra el piso
-            drawHandler(screen, update_time, player, Graph.Array, Enemy, background)
+            draw_handler(screen, update_time, player, Graph.Array, Enemy, background)
         # Se asigna el maximo de FPS a 120 y esta variable es la que de la diferencia
         elapsed = clock.tick(120)
